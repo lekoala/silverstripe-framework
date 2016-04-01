@@ -183,11 +183,16 @@ jQuery.noConflict();
 				$('.cms-container').showLoginDialog();
 				return;
 			}
-
+			
 			// Show message (but ignore aborted requests)
 			if(xhr.status !== 0 && msg && $.inArray(msg, ignoredMessages)) {
-				// Decode into UTF-8, HTTP headers don't allow multibyte
-				statusMessage(decodeURIComponent(msg), msgType);
+				if(xhr.status === 200 && msg === 'success') { 
+					// Ignore success message for successful requests
+				}
+				else {
+					// Decode into UTF-8, HTTP headers don't allow multibyte
+					statusMessage(decodeURIComponent(msg), msgType);
+				}
 			}
 
 			ajaxCompleteEvent(this);
