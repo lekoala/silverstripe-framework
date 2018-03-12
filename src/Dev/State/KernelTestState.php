@@ -88,7 +88,9 @@ class KernelTestState implements TestState
     {
         // Unnest and reset
         array_pop($this->kernels);
-        $this->kernel()->activate();
-        $this->kernel()->reset();
+        if($this->kernel()) {
+            $this->kernel()->activate();
+            $this->kernel()->reset();
+        }
     }
 }
