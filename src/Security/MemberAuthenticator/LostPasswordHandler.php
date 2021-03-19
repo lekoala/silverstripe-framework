@@ -173,7 +173,8 @@ class LostPasswordHandler extends RequestHandler
         // Allow vetoing forgot password requests
         $results = $this->extend('forgotPassword', $member);
         if ($results && is_array($results) && in_array(false, $results, true)) {
-            return $this->redirectToLostPassword();
+            // If vetoed, proceed to success screen but don't interact with the member
+            $member = null;
         }
 
         if ($member) {
