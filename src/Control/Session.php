@@ -374,7 +374,7 @@ class Session
             }
         }
 
-        $sameSite = static::config()->get('cookie_samesite');
+        $sameSite = static::config()->get('cookie_samesite') ?? self::$cookie_samesite;
         Cookie::validateSameSite($sameSite);
         $secure = $this->isCookieSecure($sameSite, Director::is_https($request));
 
