@@ -598,7 +598,10 @@ class RequestHandler extends ViewableData
      */
     public function redirect(string $url, int $code = 302): HTTPResponse
     {
-        $url = Director::absoluteURL($url);
+        // Attach site-root to relative links, if they have a slash in them
+        if ($url == "" || $url[0] == '?' || (!str_starts_with((string) $url, "http") && $url[0] != "/" && str_contains((string) $url, '/'))) {
+            $url = Director::baseURL() . $url;
+        }
         $response = new HTTPResponse();
         return $response->redirect($url, $code);
     }
