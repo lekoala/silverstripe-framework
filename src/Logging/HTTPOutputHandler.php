@@ -32,6 +32,8 @@ class HTTPOutputHandler extends AbstractProcessingHandler
      */
     private $cliFormatter = null;
 
+    private bool $disableFatal = false;
+
     /**
      * Get the mime type to use when displaying this error.
      *
@@ -150,11 +152,14 @@ class HTTPOutputHandler extends AbstractProcessingHandler
     }
 
     /**
-     * @param array $record
-     * @return bool
+     * @param LogRecord $record
      */
     protected function write(LogRecord $record): void
     {
+        if ($this->disableFatal) {
+            return;
+        }
+
         ini_set('display_errors', 0);
 
         // Suppress errors that should be suppressed
@@ -165,21 +170,24 @@ class HTTPOutputHandler extends AbstractProcessingHandler
             }
         }
 
+        // Avoid Uncaught exceptions to be displayed twice due to monolog fatal error handler
+        $this->disableFatal = true;
+
         if (Controller::has_curr()) {
             $response = Controller::curr()->getResponse();
         } else {
             $response = new HTTPResponse();
         }
 
+        // To suppress errors about errors due to $this->isError() check in HTTPResponse
+        $response->setStatusCode(200);
+
         // If headers have been sent then these won't be used, and may throw errors that we won't want to see.
         if (!headers_sent()) {
-            $response->setStatusCode($this->getStatusCode());
             $response->addHeader('Content-Type', $this->getContentType());
-        } else {
-            // To suppress errors about errors
-            $response->setStatusCode(200);
         }
 
+        // We could use $record->formatted or wait for https://github.com/Seldaek/monolog/pull/1886 to be merged
         $response->setBody($record['formatted']);
         $response->output();
     }
